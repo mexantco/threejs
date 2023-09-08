@@ -29,7 +29,7 @@
 		<script type="module">
 
 			import * as THREE from 'three';
-
+            
 			import Stats from './three.js-master/examples/jsm/libs/stats.module.js';
             import {GLTFLoader} from './three.js-master/examples/jsm/loaders/GLTFLoader.js';
 			import { GUI } from './three.js-master/examples/jsm/libs/lil-gui.module.min.js';
@@ -40,14 +40,29 @@
 			let container, stats;
 			let camera, scene, renderer;
 			let controls, water, sun, mesh, boat;
+            
+            const raycaster = new THREE.Raycaster();
+            const pointer = new THREE.Vector2();
+            function onPointerMove( event ) {
 
+// calculate pointer position in normalized device coordinates
+// (-1 to +1) for both components
+
+pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+}
+window.addEventListener( 'pointermove', onPointerMove );
 			init();
 			animate();
-
+            
 			function init() {
-
 				container = document.getElementById( 'container' );
 
+
+                
+
+             
 				//
 
 				renderer = new THREE.WebGLRenderer();
@@ -176,6 +191,8 @@ let plainback;
                    model.scale.set(4,4,4);
                 scene.add(model);
                 boat = model;
+                boat.name = 'boat';
+                
                 
                 }, 
                     function (error) {
@@ -238,9 +255,24 @@ let plainback;
 			}
 
 			function render() {
+                raycaster.setFromCamera( pointer, camera );
+ 
+	// calculate objects intersecting the picking ray
+	            
+    const intersects = raycaster.intersectObjects(scene.children);
+     console.log(intersects[0]);
+     if(intersects[0].object.name=='mesh_0'){intersects[0].object.scale.set(2,2,2)}
+     
+    //console.log(Object.keys(intersects[ 0 ]));
+for ( let i = 0; i < intersects.length; i ++ ) {
+    //intersects[0].material.opacity.set(0.5);
+    // intersects[ i ].object.material.color.set( 0xff0000 );
+    // let name = Object.keys(intersects[ 0 ].object);
+    // intersects[ 0 ].object.position.set(1,0,0);
+}
 
 				const time = performance.now() * 0.001;
-                console.log(time);
+                
 				boat.position.y = Math.sin( time ) * 1 + 1;
 				boat.rotation.x = Math.sin( time ) * 0.1;
 
@@ -251,7 +283,7 @@ let plainback;
 				renderer.render( scene, camera );
 
 			}
-
+            
 		</script>
 	</body>
 </html>
