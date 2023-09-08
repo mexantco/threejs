@@ -5,12 +5,13 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link type="text/css" rel="stylesheet" href="main.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/20.0.0/tween.umd.js"></script>
 	</head>
 	<body>
 
 		<div id="container"></div>
-		<div id="info">
-			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - webgl ocean
+		<div id="info" style="align-items: center;    position: absolute; width: 10vw; height: 10vw; display:flex; justify-content: center; padding: 2vw; box-sizing: border-box; background-color: transparent;border: whitesmoke 1px solid; border-radius: 20px;">
+			
 		</div>
 
 		<!-- Import maps polyfill -->
@@ -40,28 +41,33 @@
 			let container, stats;
 			let camera, scene, renderer;
 			let controls, water, sun, mesh, boat;
-            
+            let tween, tweenback;
+            let posY,posX;
             const raycaster = new THREE.Raycaster();
             const pointer = new THREE.Vector2();
             function onPointerMove( event ) {
 
 // calculate pointer position in normalized device coordinates
 // (-1 to +1) for both components
-
+posX=event.clientX;
+posY=event.clientY;
 pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
 }
+// Start at (0, 0)
+
+	
 window.addEventListener( 'pointermove', onPointerMove );
 			init();
 			animate();
             
 			function init() {
 				container = document.getElementById( 'container' );
-
-
                 
 
+                
+                
              
 				//
 
@@ -77,8 +83,30 @@ window.addEventListener( 'pointermove', onPointerMove );
 				scene = new THREE.Scene();
 
 				camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 1, 20000 );
-				camera.position.set( 30, 5, 50 );
+				camera.position.set( 30, 10, 50 );
+				camera.rotation.set( -0.2, 0.5, 0.1 );
+                let coords = {z:50, x:30} 
 
+                tween = new TWEEN.Tween(coords) // Create a new tween that modifies 'coords'.
+		.to({z:20, x:15}, 1500) 
+		.easing(TWEEN.Easing.Quadratic.InOut) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			// Called after tween.js updates 'coords'.
+			// Move 'box' to the position described by 'coords' with a CSS translation.
+			
+            camera.position.set( coords.x, 5, coords.z );
+		})
+        tweenback = new TWEEN.Tween(coords) // Create a new tween that modifies 'coords'.
+		.to({z:50, x:30}, 2000)
+        .delay(2000)
+		.easing(TWEEN.Easing.Quadratic.InOut) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			// Called after tween.js updates 'coords'.
+			// Move 'box' to the position described by 'coords' with a CSS translation.
+			
+            camera.position.set( coords.x, 5, coords.z );
+		})
+		
 				//
 
 				sun = new THREE.Vector3();
@@ -246,8 +274,8 @@ let plainback;
 
 			}
 
-			function animate() {
-
+			function animate(t) {
+                //TWEEN.update(t);
 				requestAnimationFrame( animate );
 				render();
 				stats.update();
@@ -260,15 +288,27 @@ let plainback;
 	// calculate objects intersecting the picking ray
 	            
     const intersects = raycaster.intersectObjects(scene.children);
-     console.log(intersects[0]);
-     if(intersects[0].object.name=='mesh_0'){intersects[0].object.scale.set(2,2,2)}
+    //console.log(intersects[0]);
+    console.log(posY);
+     if(intersects[0].object.name=='mesh_0'){
+       
+        let el = document.getElementById('info');
+        el.textContent = 'здесь могла бы быть ваша реклама';
+        el.style.display='flex';
+        el.style.left=posX+'px';
+        el.style.top=posY+'px';
+        el.style.color='white';
+        //tween.start();
+    }else{
+        let el = document.getElementById('info');
+        
+        el.style.display='none';
+        //tweenback.start()
+    }
      
-    //console.log(Object.keys(intersects[ 0 ]));
+    
 for ( let i = 0; i < intersects.length; i ++ ) {
-    //intersects[0].material.opacity.set(0.5);
-    // intersects[ i ].object.material.color.set( 0xff0000 );
-    // let name = Object.keys(intersects[ 0 ].object);
-    // intersects[ 0 ].object.position.set(1,0,0);
+    
 }
 
 				const time = performance.now() * 0.001;
